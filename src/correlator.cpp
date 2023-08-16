@@ -21,21 +21,20 @@ void Correlator::init()
 
 	vector_size = num_correlators*points_per_corr; // 512
 
-	shift.resize(num_correlators);
-	correlation.resize(num_correlators);
-	ncorrelation.resize(num_correlators);
-	accumulator.resize(num_correlators);
+    accumulator.resize(num_correlators);
 	naccumulator.resize(num_correlators);
 	insertindex.resize(num_correlators);
 
-	for (auto s : shift)
-		s.resize(points_per_corr);
-
-	for (auto corr : correlation)
-		corr.resize(points_per_corr);
-
-	for (auto ncorr : ncorrelation)
-		ncorr.resize(points_per_corr);
+	shift.resize(num_correlators);
+	correlation.resize(num_correlators);
+	ncorrelation.resize(num_correlators);
+	
+    for (uint32_t i = 0; i < num_correlators; ++i)
+    {
+        shift[i].resize(points_per_corr);
+        correlation[i].resize(points_per_corr);
+        ncorrelation[i].resize(points_per_corr);
+    }
 
 	step.resize(vector_size);
 	result.resize(vector_size);
