@@ -6,3 +6,4 @@ A simple auto-correlator for text files with two columns: time and the data to b
 
 - [ ] Allow multiple data columns
 - [ ] Enable command-line arguments
+- [ ] Multi-threading?
