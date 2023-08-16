@@ -3,7 +3,7 @@ CXX = g++
 CFLAGS = -std=c++17 -Wall -fopenmp
 
 DIR = ../build
-SRCS = main.cc correlator.cc
+SRCS = main.cpp correlator.cpp
 EXE = $(DIR)/CorrelatorIO
 LDFLAGS = -O3
 #LDFLAGS = -O0 -g -DDEBUG

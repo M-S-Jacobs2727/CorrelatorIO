@@ -1,5 +1,5 @@
-#include "correlator.h"
 #include <math.h>
+#include "correlator.hpp"
 
 /////////////////////////////////////////
 // Correlator class
@@ -136,8 +136,8 @@ void Correlator::evaluate(const bool norm)
 	}
 
 	// Subsequent correlators
-	for (int k=1;k<num_correlators_used;++k) {
-		for (int i=min_dist_bt_points;i<points_per_corr;++i) {
+	for (uint32_t k=1;k<num_correlators_used;++k) {
+		for (uint32_t i=min_dist_bt_points;i<points_per_corr;++i) {
 			if (ncorrelation[k][i]>0) {
 				step[im] = i * pow((double)npoints_to_avg, k);
 				result[im] = correlation[k][i] / ncorrelation[k][i] - aux;

@@ -3,7 +3,7 @@
 #include <sstream>
 #include <string>
 
-#include "correlator.h"
+#include "correlator.hpp"
 
 int main(int argc, char *argv[])
 {
@@ -29,11 +29,11 @@ int main(int argc, char *argv[])
 
 	// Get number of columns for rows after comment(s)
 	std::string line;
-	uint32_t num_cols;
-	auto linestart = fin.tell();
+	uint32_t num_cols = 0;
+	auto linestart = fin.tellg();
 	while (fin.good())
 	{
-		linestart = fin.tell();
+		linestart = fin.tellg();
 		std::string word;
 		fin >> word;
 		if (word[0] == '#')
@@ -42,7 +42,7 @@ int main(int argc, char *argv[])
 		}
 		else
 		{
-			fin.seek(linestart);
+			fin.seekg(linestart);
 			std::getline(fin, line);
 			std::istringstream iss(line);
 
@@ -55,13 +55,19 @@ int main(int argc, char *argv[])
 			break;
 		}
 	}
+    if (num_cols == 0)
+    {
+        std::cerr << "ERROR: No data columns found.\n";
+        return 1;
+    }
 
 	std::vector<Correlator> correlators(num_cols - 1);
 
-	fin.seek(linestart);
+	fin.seekg(linestart);
 	
 	while(!fin.eof())
 	{
+        std::string word;
 		fin >> word; // time
 		for (uint32_t i = 0; i < num_cols - 1; ++i)
 		{
@@ -86,7 +92,7 @@ int main(int argc, char *argv[])
 	
 	for (uint32_t i = 0; i < correlators[0].num_points_out; ++i)
 	{
-		fout << correlators[0].step[i]
+		fout << correlators[0].step[i];
 		for (auto c : correlators)
 			fout << ' ' << c.result[i] << '\n';
 	}

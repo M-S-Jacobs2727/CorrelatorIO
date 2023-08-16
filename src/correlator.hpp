@@ -2,6 +2,7 @@
 #ifndef __correlator_h
 #define __correlator_h
 
+#include <cstdint>
 #include <vector>
 
 ////////////////////////////////////////////////////
