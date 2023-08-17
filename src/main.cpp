@@ -69,16 +69,16 @@ int main(int argc, char *argv[])
 	{
         std::string word;
 		fin >> word; // time
-		for (uint32_t i = 0; i < num_cols - 1; ++i)
+		for (auto& c : correlators)
 		{
 			fin >> val;
-			correlators[i].add(val);
+			c.add(val);
 		}
 	}
 	
 	fin.close();
 
-	for (auto c : correlators)
+	for (auto& c : correlators)
 		c.evaluate();
 
 	std::ofstream fout;
@@ -89,12 +89,16 @@ int main(int argc, char *argv[])
 		std::cerr << "Error opening output file " << outfile << '\n';
 		return 1;
 	}
+
+	correlators[0].computeSteps();
+	auto& step = correlators[0].step;
 	
-	for (uint32_t i = 0; i < correlators[0].num_points_out; ++i)
+	for (uint32_t i = 0; i < step.size(); ++i)
 	{
-		fout << correlators[0].step[i];
-		for (auto c : correlators)
-			fout << ' ' << c.result[i] << '\n';
+		fout << step[i];
+		for (const auto& c : correlators)
+			fout << ' ' << c.result[i];
+		fout << '\n';
 	}
 
 	fout.close();

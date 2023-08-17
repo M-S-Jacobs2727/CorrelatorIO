@@ -1,2 +1,8 @@
-build/**
-test/**
+build/
+test/
+*.json
+*.sln
+*.vcxproj*
+x64/
+Debug/
+.vs/
