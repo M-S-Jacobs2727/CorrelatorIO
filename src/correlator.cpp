@@ -1,8 +1,5 @@
 #include "correlator.hpp"
 
-/////////////////////////////////////////
-// Correlator class
-/////////////////////////////////////////
 Correlator::Correlator ()
 {
 	m_num_correlators = 32;
@@ -19,9 +16,9 @@ Correlator::Correlator(const uint32_t numcorrin, const uint32_t pin, const uint3
 
 void Correlator::init()
 {
-	m_min_dist_bt_points = m_points_per_corr / m_npoints_to_avg;  // 8
+	m_min_dist_bt_points = m_points_per_corr / m_npoints_to_avg;
 
-	m_vector_size = m_num_correlators*m_points_per_corr; // 512
+	m_vector_size = m_num_correlators*m_points_per_corr;
 
     m_accumulator_vec.resize(m_num_correlators);
 	m_corr_idx_vec.resize(m_num_correlators);
@@ -84,20 +81,13 @@ uint32_t Correlator::pow(uint32_t base, uint32_t power)
 
 void Correlator::add(const double w, const unsigned int k)
 {
-	/// If we exceed the correlator size, the value is discarded
 	if (k == m_num_correlators)
 		return;
 	if (k > m_num_correlators_used)
 		m_num_correlators_used = k;
 
-	/// Insert new value in shift array
 	m_shift_mat[k][ m_corr_insert_idx_vec[k] ] = w;
 
-	/// Add to average value
-	//if (k == 0)
-	//	  m_accumulated_values += w;
-
-	/// Add to accumulator and, if needed, add to next correlator
 	m_accumulator_vec[k] += w;
 	++m_corr_idx_vec[k];
 	if (m_corr_idx_vec[k] == m_npoints_to_avg)
@@ -107,13 +97,12 @@ void Correlator::add(const double w, const unsigned int k)
 		m_corr_idx_vec[k] = 0;
 	}
 
-	/// Calculate correlation function
 	uint32_t ind1 = m_corr_insert_idx_vec[k];
 	if (k == 0) 
-	{ /// First correlator is different
+	{
 		int ind2 = ind1;
 		for (uint32_t j = 0; j < m_points_per_corr; ++j)
-		{  //16
+		{
 			if (m_shift_mat[k][ind2] > -1e10) {
 				m_correlation_mat[k][j] += m_shift_mat[k][ind1] * m_shift_mat[k][ind2];
 				++m_num_vals_mat[k][j];
@@ -127,7 +116,7 @@ void Correlator::add(const double w, const unsigned int k)
 	{
 		int ind2 = ind1 - m_min_dist_bt_points;
 		for (uint32_t j = m_min_dist_bt_points; j < m_points_per_corr; ++j)
-		{  //[8, 16]
+		{
 			if (ind2 < 0)
 				ind2 += m_points_per_corr;
 			if (m_shift_mat[k][ind2] > -1e10)
@@ -144,31 +133,10 @@ void Correlator::add(const double w, const unsigned int k)
 		m_corr_insert_idx_vec[k] = 0;
 }
 
-void Correlator::evaluate(const bool norm)
+void Correlator::evaluate()
 {
 	uint32_t k = 0;
 
-	// normalization
-	//double aux = 0;
-	//if (norm)
-	//{
-	//	aux = m_accumulated_values / m_num_vals_mat[0][0];
-	//	aux *= aux;
-	//}
-
-	// First correlator
-	//for (uint32_t i = 0; i < m_points_per_corr; ++i)
-	//{
-	//	if (m_num_vals_mat[0][i] != 0)
-	//	{
-	//		step[im] = i;
-	//		//result[im] = m_correlation_mat[0][i] / m_num_vals_mat[0][i] - aux;
-	//		result[im] = m_correlation_mat[0][i] / m_num_vals_mat[0][i];
-	//		++im;
-	//	}
-	//}
-
-	// Subsequent correlators
 	uint32_t start = 0;
 	for (uint32_t i = 0; i < m_num_correlators_used; ++i)
 	{
@@ -176,15 +144,12 @@ void Correlator::evaluate(const bool norm)
 		{
 			if (m_num_vals_mat[i][j] != 0)
 			{
-				//step[k] = j * pow(m_npoints_to_avg, i);
-				//result[num_points_out] = m_correlation_mat[k][i] / m_num_vals_mat[k][i] - aux;
 				result[k] = m_correlation_mat[i][j] / m_num_vals_mat[i][j];
 				++k;
 			}
 		}
 		start = m_min_dist_bt_points;
 	}
-	//step.resize(k);
 	result.resize(k);
 	m_evaluated = true;
 }
