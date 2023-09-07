@@ -11,10 +11,9 @@ public:
 
 	void add(const double w, const unsigned int k = 0);
 	void evaluate();
-	void computeSteps();
+	std::vector<double> computeTimesteps(double);
 public:
 	//TODO: change to time, based on dt in input file
-	std::vector<uint32_t> step;
 	std::vector<double> result;
 
 private:

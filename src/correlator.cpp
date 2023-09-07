@@ -35,15 +35,18 @@ void Correlator::init()
         m_num_vals_mat[i].resize(m_points_per_corr);
     }
 
-	step.resize(m_vector_size);
 	result.resize(m_vector_size);
 }
 
-void Correlator::computeSteps()
+std::vector<double> Correlator::computeTimesteps(double timestep)
 {
+	std::vector<double> timesteps;
+
 	// TODO: insert return statement here
 	if (!m_evaluated)
-		return;
+		return timesteps;
+
+	timesteps.resize(m_vector_size);
 
 	uint32_t k = 0;
 	uint32_t start = 0;
@@ -53,14 +56,15 @@ void Correlator::computeSteps()
 		{
 			if (m_num_vals_mat[i][j] != 0)
 			{
-				step[k] = j * pow(m_npoints_to_avg, i);
+				timesteps[k] = j * pow(m_npoints_to_avg, i) * timestep;
 				++k;
 			}
 		}
 		start = m_min_dist_bt_points;
 	}
-	step.resize(k);
-	return;
+
+	timesteps.resize(k);
+	return timesteps;
 }
 
 uint32_t Correlator::pow(uint32_t base, uint32_t power)

@@ -193,41 +193,70 @@ uint32_t getNumCols(std::ifstream& fin)
 	return num_cols;
 }
 
-int main(int argc, char* argv[])
+std::vector<Correlator> ingestFile(Options options)
 {
-	Options options = parseArgs(argc, argv);
-
 	std::ifstream fin(options.infile);
 
-	if(!fin.good())
+	if (!fin.good())
 	{
 		std::cerr << "Error opening input file " << options.infile << '\n';
 		exit(FileError);
 	}
 	uint32_t num_cols = getNumCols(fin);
+	uint32_t num_cols_to_read = num_cols - options.cols_to_skip.size();
 
+	std::vector<std::vector<double>> data;
+	data.resize(num_cols_to_read);
 
-	std::vector<Correlator> correlators(num_cols - options.cols_to_skip.size());
-	while(!fin.eof())
+	auto skip_begin = options.cols_to_skip.begin();
+	auto skip_end = options.cols_to_skip.end();
+
+	while (!fin.eof())
 	{
-		uint32_t col = options.cols_to_skip[0];
-		for (uint32_t i = 0; i < num_cols - 1; ++i)
+		uint32_t c = 0;
+		for (uint32_t i = 0; i < num_cols; ++i)
 		{
-			if (i == col)
+			auto skip = std::find(skip_begin, skip_end, i);
+			if (skip == skip_end)
+			{
+				double val;
+				fin >> val;
+				data[c].push_back(val);
+				++c;
+			}
+			else
 			{
 				std::string trash;
 				fin >> trash;
 			}
-			else
-			{
-				double val;
-				fin >> val;
-				correlators[i].add(val);
-			}
 		}
 	}
-
 	fin.close();
+
+	for (uint32_t c : options.fluct_columns)
+	{
+		double mean = 0.0;
+		for (double x : data[c])
+			mean += x;
+		mean /= data[c].size();
+		for (double& x : data[c])
+			x -= mean;
+	}
+
+	std::vector<Correlator> correlators(data.size());
+
+	for (uint32_t i = 0; i < data.size(); ++i)
+	{
+		for (uint32_t j = 0; j < data[0].size(); ++j)
+			correlators[i].add(data[i][j]);
+	}
+}
+
+int main(int argc, char* argv[])
+{
+	Options options = parseArgs(argc, argv);
+
+	auto correlators = ingestFile(options);
 
 	for (auto& c : correlators)
 		c.evaluate();
@@ -240,12 +269,11 @@ int main(int argc, char* argv[])
 		exit(FileError);
 	}
 
-	correlators[0].computeSteps();
-	auto& step = correlators[0].step;
+	auto timesteps = correlators[0].computeTimesteps(options.timestep);
 
-	for (uint32_t i = 0; i < step.size(); ++i)
+	for (uint32_t i = 0; i < timesteps.size(); ++i)
 	{
-		fout << step[i];
+		fout << timesteps[i];
 		for (const auto& c : correlators)
 			fout << ' ' << c.result[i];
 		fout << '\n';
