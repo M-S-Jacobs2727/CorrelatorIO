@@ -5,7 +5,7 @@ CFLAGS = -std=c++17 -Wall
 DIR = ../build
 SRCS = main.cpp correlator.cpp
 EXE = $(DIR)/CorrelatorIO
-LDFLAGS = -O0 -g
+LDFLAGS = -O3 -g
 #LDFLAGS = -O0 -g -DDEBUG
 
 .PHONY: all clean prep remake

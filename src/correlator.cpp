@@ -75,7 +75,6 @@ uint32_t Correlator::pow(uint32_t base, uint32_t power)
 	if (power == 1)
 		return base;
 	
-	uint32_t result = 1;
 	uint32_t power1, power2;
 	power1 = power / 2;
 	power2 = power - power1;

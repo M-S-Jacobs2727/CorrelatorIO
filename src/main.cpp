@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -14,8 +15,8 @@ void help()
 	std::cerr
 		<< "Usage: CorrelatorIO [-h] -i <infile> -o <outfile> [-t <timestep>] [-f <fluct_cols>] [-s <skip_cols>] [-c <corr_values>]\n"
 		<< "\t-c <corr_values>	Must be three comma-separated values: number of correlators,\n"
-		<< "\t					length of each correlator, number of values to average before\n"
-		<< "\t					adding to the correlator. Default values: 32,16,2\n";
+		<< "\t                  length of each correlator, number of values to average before\n"
+		<< "\t                  adding to the correlator. Default values: 32,16,2\n";
 }
 
 struct Options
@@ -51,15 +52,15 @@ std::vector<uint32_t> parseRangeString(const std::string& rangeString)
 				std::cerr << "Invalid range string: " << rangeString << '\n';
 				exit(RangeStringError);
 			}
-			else if (item[i] < '0' || item[i] > '9')
-			{
-				std::cerr << "Invalid range string: " << rangeString << '\n';
-				exit(RangeStringError);
-			}
 			else if (item[i] == '-')
 			{
 				hyphenIdx = i;
 				break;
+			}
+			else if (item[i] < '0' || item[i] > '9')
+			{
+				std::cerr << "Invalid range string: " << rangeString << '\n';
+				exit(RangeStringError);
 			}
 		}
 
@@ -91,7 +92,7 @@ Options parseArgs(int argc, char* argv[])
 	Options options;
 	std::vector<uint32_t> corr_options;
 
-	for (uint32_t i = 0; i < argc; ++i)
+	for (int i = 1; i < argc; ++i)
 	{
 		auto flag = argv[i];
 		if (flag[0] != '-')
@@ -250,6 +251,8 @@ std::vector<Correlator> ingestFile(Options options)
 		for (uint32_t j = 0; j < data[0].size(); ++j)
 			correlators[i].add(data[i][j]);
 	}
+
+    return correlators;
 }
 
 int main(int argc, char* argv[])
