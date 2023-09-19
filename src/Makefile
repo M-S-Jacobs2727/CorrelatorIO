@@ -1,6 +1,6 @@
 CXX = g++
 
-CFLAGS = -std=c++17 -Wall
+CFLAGS = -std=c++17 -Wall -fopenmp
 
 DIR = ../build
 SRCS = main.cpp correlator.cpp
